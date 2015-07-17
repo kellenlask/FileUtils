@@ -9,7 +9,6 @@ import java.io.File;
 import java.util.Iterator;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -18,10 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 
@@ -32,25 +28,29 @@ import org.apache.commons.io.FileUtils;
  * @author Kellen
  */
 public class FileSort {
-//Fields
+//******************************************************************************
+//	Fields
+//******************************************************************************
+    //Constants
 
+    private static final int WIDTH = 550;
+    private static final int HEIGHT = 350;
+    private static final String BUTTON_STYLE = "-fx-background-color: #336699;";
+
+    //Other
     private static File selectedDirectory;
 
-//JavaFX Fields
+    //JavaFX Fields
     private static Button removeDuplicatesButton;
     private static Button batchRenameButton;
-    private static TextField fileTypes;
-    private static Button all;
-    private static Button images;
-    private static Button music;
-    private static Button documents;
-    private static Button video;
-    private static Button browseButton;
+    private static TextField fileTypes = new TextField();
     private static Button sortButton;
     private static Text actiontarget;
-    private static TextField address;
+    private static TextField address = new TextField();
 
-//Constructor
+//******************************************************************************
+//	Constructor
+//******************************************************************************
     public FileSort(Stage primaryStage) {
 	//Setup the PrimaryStage and make it visible. 	
 	Scene scene = makeScene();
@@ -64,7 +64,9 @@ public class FileSort {
 
     } //End public FileSort()
 
-//Logistical Methods
+//******************************************************************************
+//	Action Handlers
+//******************************************************************************
     public static void addActionHandlers(Stage primaryStage) {
 	//Action Handler: Sort Files Button Pressed.
 	removeDuplicatesButton.setOnAction((ActionEvent event) -> {
@@ -76,23 +78,10 @@ public class FileSort {
 
 	});
 
-	//Action Handler: get the directory from the user.	
-	browseButton.setOnAction((ActionEvent event) -> { //Lambda expression: get the directory from the user.
-	    DirectoryChooser directoryChooser = new DirectoryChooser();
-
-	    directoryChooser.setTitle("Select Directory");
-	    String currentDir = System.getProperty("user.dir") + File.separator;
-	    directoryChooser.setInitialDirectory(new File(currentDir));
-
-	    selectedDirectory = directoryChooser.showDialog(null);
-
-	    if (selectedDirectory != null) {
-		address.setText(selectedDirectory.getPath());
-	    }
-	});
-
 	//Action Handler: sort the files in the directory.
-	sortButton.setOnAction((ActionEvent e) -> { //Lambda expression: remove duplicate files.
+	sortButton.setOnAction((ActionEvent e) -> {
+	    selectedDirectory = new File(address.getText());
+
 	    if (selectedDirectory != null) {
 		String[] extensions = null;
 
@@ -118,127 +107,56 @@ public class FileSort {
 	    }
 	});
 
-	//Action Handler: set file types to [all]
-	all.setOnAction((ActionEvent event) -> {
-	    fileTypes.setText("");
-	});
-
-	//Action Handler: set file types to image types
-	images.setOnAction((ActionEvent event) -> {
-	    fileTypes.setText("gif, jpg, jpeg, png, ico");
-	});
-
-	//Action Handler: set file types to music types
-	music.setOnAction((ActionEvent event) -> {
-	    fileTypes.setText("flac, oga, wma, mp3, acc");
-	});
-
-	//Action Handler: set file types to document types
-	documents.setOnAction((ActionEvent event) -> {
-	    fileTypes.setText("pdf, doc, docx, xls, xlsx, ppt, pptx");
-	});
-
-	//Action Handler: set file types to video types
-	video.setOnAction((ActionEvent event) -> {
-	    fileTypes.setText("avi, wmv, mpeg, mpg, mkv, flv, ogv, mp4");
-	});
-
     } //End public static void addActionHandlers()
 
+//******************************************************************************
+//	GUI
+//******************************************************************************    
     public static Scene makeScene() {
-	//Setup the BorderPane
+	//Setup the main BorderPane (Holds all the things)
 	BorderPane backPane = new BorderPane();
 
+	//----------------------------------------------------------------------
 	//Setup the Main Menu Buttons & Pane
+	//Make the buttons
 	removeDuplicatesButton = new Button("Remove Duplicates");
 	batchRenameButton = new Button("Batch Rename Files");
 
+	//Make the buttons' container
 	HBox mainButtons = new HBox();
 	mainButtons.setPadding(new Insets(15, 12, 15, 12));
 	mainButtons.setSpacing(10);
-	mainButtons.setStyle("-fx-background-color: #336699;");
+	mainButtons.setStyle(BUTTON_STYLE);
 
+	//Put the buttons in the container
 	mainButtons.getChildren().add(removeDuplicatesButton);
 	mainButtons.getChildren().add(batchRenameButton);
 
+	//Attach the container to the main pane
 	backPane.setTop(mainButtons);
 
-	//Setup the Bottom TextField
-	fileTypes = new TextField();
-	fileTypes.setPrefWidth(300);
-
-	HBox fileTypePane = new HBox();
-	fileTypePane.setPadding(new Insets(15, 12, 15, 12));
-	fileTypePane.setSpacing(10);
-
-	fileTypePane.getChildren().add(new Text("File Types:"));
-	fileTypePane.getChildren().add(fileTypes);
-
+	//----------------------------------------------------------------------
+	//Setup the filetypes box
+	HBox fileTypePane = GUIFactories.getFileTypeBox(fileTypes);
 	backPane.setBottom(fileTypePane);
 
-	//Setup the FileType Pre-set Buttons
-	all = new Button("All");
-	all.setMaxWidth(Double.MAX_VALUE);
-
-	images = new Button("Images");
-	images.setMaxWidth(Double.MAX_VALUE);
-
-	music = new Button("Music");
-	music.setMaxWidth(Double.MAX_VALUE);
-
-	documents = new Button("Documents");
-	documents.setMaxWidth(Double.MAX_VALUE);
-
-	video = new Button("Video");
-	video.setMaxWidth(Double.MAX_VALUE);
-
-	VBox preSets = new VBox();
-	preSets.setPadding(new Insets(15, 12, 15, 12));
-	preSets.setSpacing(10);
-	preSets.getChildren().add(all);
-	preSets.getChildren().add(images);
-	preSets.getChildren().add(music);
-	preSets.getChildren().add(documents);
-	preSets.getChildren().add(video);
-
+	//----------------------------------------------------------------------
+	//Set filetype presets menu
+	VBox preSets = GUIFactories.getPresets(fileTypes);
 	backPane.setRight(preSets);
 
-	//Setup the GridPane	
-	GridPane grid = new GridPane();
-	grid.setAlignment(Pos.CENTER);
-	grid.setHgap(10);
-	grid.setVgap(10);
-	grid.setPadding(new Insets(25, 25, 25, 25));
-
-	Text scenetitle = new Text("Select Working Directory:");
-	scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-	grid.add(scenetitle, 0, 0, 2, 1);
-
-	address = new TextField();
-	address.setPrefWidth(300);
-	grid.add(address, 1, 1);
-
-	browseButton = new Button("...");
-	browseButton.setMaxWidth(Double.MAX_VALUE);
-	HBox hbBtn = new HBox(20);
-	hbBtn.setAlignment(Pos.CENTER);
-	hbBtn.getChildren().add(browseButton);
-	grid.add(hbBtn, 2, 1);
-
+	//----------------------------------------------------------------------
+	//Setup the center pane
 	sortButton = new Button("Sort Files");
-	HBox hbBtn2 = new HBox(10);
-	hbBtn2.getChildren().add(sortButton);
-	hbBtn2.setAlignment(Pos.CENTER_LEFT);
-
 	actiontarget = new Text();
-	hbBtn2.getChildren().add(actiontarget);
 
-	grid.add(hbBtn2, 1, 3);
-
+	GridPane grid = GUIFactories.getCenterPane(address, sortButton, actiontarget);
 	backPane.setCenter(grid);
 
-	Scene scene = new Scene(backPane, 500, 300);
+	//----------------------------------------------------------------------
+	Scene scene = new Scene(backPane, WIDTH, HEIGHT);
 	return scene;
+	
     } //End public Scene makeScene()    
 
 } //End FileSort

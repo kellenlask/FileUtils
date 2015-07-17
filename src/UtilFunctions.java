@@ -7,14 +7,11 @@
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 import javax.swing.JOptionPane;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -59,7 +56,7 @@ public class UtilFunctions {
     } //End public static String[] parseFileTypes(String)
 
     //Takes a file and makes a hash code in the form of a String.
-    public static String makeHash(File file) throws Exception {
+    public static String makeHash(File file) throws FileNotFoundException, IOException {
 	FileInputStream fis = new FileInputStream(file);
 	String hash = DigestUtils.md5Hex(fis);
 	fis.close();
@@ -67,59 +64,6 @@ public class UtilFunctions {
 	return hash;
 	
     } //End public static String makeHash(File)
-
-    //Recursively gets all the files in a given directory with the given file
-    //extensions and returns a Map<String, String> of the file paths and the
-    //file hash codes.
-    public static HashMap<String, String> getFiles(String[] extensions, File selectedDirectory) throws Exception {
-	List<File> files = (List<File>) FileUtils.listFiles(selectedDirectory, extensions, true);
-	HashMap<String, String> map = new HashMap<>();
-
-	for (File f : files) {
-	    map.put(f.getAbsolutePath(), makeHash(f));
-	}
-
-	return map;
-
-    } //End public HashMap<String, String> getImageFiles()
-
-    public static ArrayList<String> findDuplicateFiles(HashMap<String, String> map) {
-	Set<String> keys = map.keySet();
-	HashSet<String> noDuplicates = new HashSet<>();
-	ArrayList<String> deleteTheseFiles = new ArrayList<>();
-
-		//If a hash code already exists in the set unique of hash strings, then add
-	//the associated file address to the ArrayList of deletable files.
-	//Otherwise, add the hash code to the set.
-	for (String s : keys) {
-	    if (!noDuplicates.contains(map.get(s))) {
-		noDuplicates.add(map.get(s));
-
-	    } else {
-		deleteTheseFiles.add(s);
-	    }
-	}
-
-	return deleteTheseFiles;
-
-    } //End public int removeDuplicateFiles(HashMap<String, String>)
-
-    public static int removeFiles(ArrayList<String> files) throws java.io.FileNotFoundException {
-	int filesRemoved = 0;
-
-	for (String s : files) {
-	    File file = new File(s); //Minimal Scope
-
-	    if (!file.delete()) {
-		JOptionPane.showMessageDialog(null, s + " not deleted.");
-	    } else {
-		filesRemoved++;
-	    }
-	}
-
-	return filesRemoved;
-
-    } //End private int removeFiles(ArrayList<String>)
 
     public static String getFileExtension(File f) throws IOException {
 	String path = f.getCanonicalPath();

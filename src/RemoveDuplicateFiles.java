@@ -1,7 +1,9 @@
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,6 +21,7 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
+import org.apache.commons.io.FileUtils;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -39,7 +42,10 @@ public class RemoveDuplicateFiles {
     private static final String DOCUMENT_FILE_TYPES = "pdf, doc, docx, xls, xlsx, ppt, pptx";
     private static final String VIDEO_FILE_TYPES = "avi, wmv, mpeg, mpg, mkv, flv, ogv, mp4";
     private static final String BUTTON_STYLE = "-fx-background-color: #336699;";
-
+    private static final int WIDTH = 550;
+    private static final int HEIGHT = 350;
+    
+    
     //Other Fields
     private static File selectedDirectory;
 
@@ -105,22 +111,69 @@ public class RemoveDuplicateFiles {
 	});
 
 	//Action Handler: remove the duplicate files in the directory.
-	rmvButton.setOnAction((ActionEvent e) -> { //Lambda expression: remove duplicate files.
-	    //TODO: set the selected directory from the textbox (the user could have manually changed it)
-	    if (selectedDirectory != null) {
+	rmvButton.setOnAction((ActionEvent event) -> { //Lambda expression: remove duplicate files.
+	    //Make sure we have the right path
+	    selectedDirectory = new File(address.getText());
+	    
+	    if (selectedDirectory != null && selectedDirectory.isDirectory()) {
 		//Grab the list of file types from the textbox
 		String[] extensions = UtilFunctions.parseFileTypes(fileTypes.getText());
-
-		try {
-		    HashMap<String, String> map = UtilFunctions.getFiles(extensions, selectedDirectory);
-		    ArrayList<String> duplicates = UtilFunctions.findDuplicateFiles(map);
-		    int filesRemoved = UtilFunctions.removeFiles(duplicates);
-
-		    actiontarget.setFill(Color.BLACK);
-		    actiontarget.setText("Files Deleted: " + filesRemoved);
-		} catch (Exception except) {
-		    JOptionPane.showMessageDialog(null, "Error Occured: " + except.toString());
-		}
+		
+		//Grab the list of files in the selectedDirectory
+		List<File> files = (List<File>) FileUtils.listFiles(selectedDirectory, extensions, true);
+		HashSet<String> hashCodes = new HashSet<>();
+		ArrayList<File> duplicates = new ArrayList<>();
+		
+		//Progress reporting values
+		actiontarget.setFill(Color.BLACK);
+		int totalFileCount = files.size();
+		int filesProcessed = 0;
+		
+		//Find the duplicate files
+		for(File f : files) {
+		    try {
+			//Update the status
+			filesProcessed++;
+			actiontarget.setText("Processing file " + filesProcessed + " of " + totalFileCount);
+			
+			//Grab the file's hash code
+			String hash = UtilFunctions.makeHash(f);
+			
+			//If we already have a file matching that hash code
+			if(hashCodes.contains(hash)) {
+			    //Add the file to the list of files to be deleted
+			    duplicates.add(f);
+			} else {
+			    hashCodes.add(hash);
+			}
+			
+			
+		    } catch(Exception except) {	    }
+		} //End for
+		
+		//Progress reporting
+		filesProcessed = 0;
+		totalFileCount = duplicates.size();
+		Iterator<File> itr = duplicates.iterator();
+		
+		//Remove the duplicate files
+		while(itr.hasNext()) {
+		    try {
+			//Update the status
+			filesProcessed++;
+			actiontarget.setText("Deleting file " + filesProcessed + " of " + totalFileCount);
+			
+			//Grab the file
+			File file = itr.next();
+			
+			if (!file.delete()) {
+			    JOptionPane.showMessageDialog(null, file.getPath() + " not deleted.");
+			}
+			
+		    } catch(Exception except) {	    }
+		} //End while
+		
+		actiontarget.setText("Deleted: " + filesProcessed);
 
 	    } else {
 		actiontarget.setFill(Color.FIREBRICK);
@@ -250,7 +303,7 @@ public class RemoveDuplicateFiles {
 
 	backPane.setCenter(grid);
 
-	Scene scene = new Scene(backPane, 500, 300);
+	Scene scene = new Scene(backPane, WIDTH, HEIGHT);
 	return scene;
     } //End public Scene makeScene()
 }//End class RemoveDuplicateFiles

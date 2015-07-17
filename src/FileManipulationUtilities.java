@@ -10,15 +10,15 @@ import javafx.stage.Stage;
 
 public class FileManipulationUtilities extends Application {
 
-//main
+    //main
     public static void main(String[] args) {
-	launch(args);
+	launch(args); //Launch the JavaFX thread
     } //End main
 	
     @Override
+    //Initialize the JavaFX thread
     public void start(Stage primaryStage) throws Exception {
-		new RemoveDuplicateFiles(primaryStage);
+	new RemoveDuplicateFiles(primaryStage); //Open the first window
 	
     } //End public void start(Stage)
-	
 } //End Class FileManipulationUtilities

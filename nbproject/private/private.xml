@@ -88,7 +88,11 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Kellen/Desktop/FileUtils/src/BatchRename.java</file>
+            <file>file:/media/StorageDrive/Projects/FileUtils/src/BatchRename.java</file>
+            <file>file:/media/StorageDrive/Projects/FileUtils/src/UtilFunctions.java</file>
+            <file>file:/media/StorageDrive/Projects/FileUtils/src/RemoveDuplicateFiles.java</file>
+            <file>file:/media/StorageDrive/Projects/FileUtils/src/FileSort.java</file>
+            <file>file:/media/StorageDrive/Projects/FileUtils/src/FileManipulationUtilities.java</file>
         </group>
     </open-files>
 </project-private>

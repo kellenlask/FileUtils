@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -35,7 +36,8 @@ public class BatchRename {
     private static TextField postfix;
     private static TextField renameFromThis;
     private static TextField renameToThis;
-    
+    private static ProgressIndicator pin;
+	
 //Constructor
     public BatchRename(Stage primaryStage) {
 		//Setup the PrimaryStage and make it visible. 	
@@ -81,9 +83,13 @@ public class BatchRename {
 	    try {
 		//Find all the files that match the "where" field
 		File[] files = selectedDirectory.listFiles();
-
+		
+        pin.setProgress(-1);
+		
 		int filesChanged = UtilFunctions.batchRename(files, prefix.getText(), postfix.getText(), renameFromThis.getText(), renameToThis.getText());
 
+		pin.setProgress(100);
+		
 		if(filesChanged >= 0) {
 		    actiontarget.setFill(Color.BLACK);
 		    actiontarget.setText("Files changed: " + filesChanged);
@@ -109,7 +115,7 @@ public class BatchRename {
 		//Setup the Main Menu Buttons & Pane
 		removeDuplicatesButton = new Button("Remove Duplicates");
 		sortButton = new Button("Sort Files");
-
+		
 		HBox mainButtons = new HBox();
 		mainButtons.setPadding(new Insets(15, 12, 15, 12));
 		mainButtons.setSpacing(10);
@@ -117,7 +123,8 @@ public class BatchRename {
 
 		mainButtons.getChildren().add(removeDuplicatesButton);
 		mainButtons.getChildren().add(sortButton);
-
+		mainButtons.getChildren().add(pin);
+		
 		backPane.setTop(mainButtons);
 
 		//Setup the Rows (There'll be 5 rows) 
@@ -196,5 +203,24 @@ public class BatchRename {
 		Scene scene = new Scene(backPane, 500, 300);
 		return scene;
     } //End public Scene makeScene()
+	
+	public static void setProgressIndicator() {
+		pin = new ProgressIndicator(0);
+		
+//		pin.progressProperty().addListener(new ChangeListener<Number>() {
+//			@Override
+//			public void changed(ObservableValue<? extends Number> ov, Number t, Number newValue) {
+//				// If progress is 100% then show Text
+//				if (newValue.doubleValue() >= 1) {
+//					// Apply CSS so you can lookup the text
+//					pin.applyCss();
+//					Text text = (Text) pin.lookup(".text.percentage");
+//					// This text replaces "Done"
+//					text.setText("");
+//				}
+//			}
+//		});
+		
+	}
 	
 }//End public class BatchRename

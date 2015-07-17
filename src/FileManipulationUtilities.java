@@ -17,7 +17,7 @@ public class FileManipulationUtilities extends Application {
 	
     @Override
     public void start(Stage primaryStage) throws Exception {
-	new RemoveDuplicateFiles(primaryStage);
+		new RemoveDuplicateFiles(primaryStage);
 	
     } //End public void start(Stage)
 	

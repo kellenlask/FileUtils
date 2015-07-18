@@ -10,11 +10,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Scanner;
-import javax.swing.JOptionPane;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -65,68 +64,26 @@ public class UtilFunctions {
 	
     } //End public static String makeHash(File)
 
-    public static String getFileExtension(File f) throws IOException {
-	String path = f.getCanonicalPath();
-	String extension = null;
-
-	for (int i = path.length() - 1; i >= 0; i--) {
-	    extension = path.substring(i);
-
-	    if (extension.contains(".")) {
-		break;
-	    }
-	}
-
-	return extension.substring(1).toLowerCase();
-    } //End public static String getFileExtension(File)
-
     public static File makeDirectory(File parentDirectory, String newDirectoryName) {
 	try {
 	    File newDirectory = new File(parentDirectory.getCanonicalPath() + "/" + newDirectoryName + "/");
 	    int i = 0;
-
+	    
 	    while (newDirectory.exists()) {
 		newDirectory = new File(parentDirectory.getCanonicalPath() + "/" + newDirectoryName + i + "/");
 		i++;
 	    }
-
-	    boolean success = newDirectory.mkdir();
-	    if (!success) {
-		throw new Exception();
-	    }
-
+	    
+	    newDirectory.mkdir();
+	    
 	    return newDirectory;
-
-	} catch (Exception e) {
-	    JOptionPane.showMessageDialog(null, "Could not create new directory.");
-	    return null;
+	
+	} catch (IOException ex) {
+	    Logger.getLogger(UtilFunctions.class.getName()).log(Level.SEVERE, null, ex);
+	    return parentDirectory;
 	}
 
     } //End public static boolean makeSortDirectory()
-
-    public static int sortFiles(Iterator<File> fileItr, File parentDirectory) {
-	try {
-	    File organizedDir = makeDirectory(parentDirectory, "OrganizedFiles");
-	    if (organizedDir == null) {
-		throw new Exception();
-	    }
-
-	    int filesSorted = 0;
-
-	    while (fileItr.hasNext()) {
-		File tmp = fileItr.next();
-		File dest = new File(organizedDir.getAbsolutePath() + "/" + getFileExtension(tmp));
-
-		FileUtils.moveFileToDirectory(tmp, dest, true);
-
-		filesSorted++;
-	    }
-
-	    return filesSorted;
-	} catch (Exception e) {
-	    return -1;
-	}
-    } //End  public static boolean sortFiles(Iterator<File>)
 
     public static int batchRename(File[] files, String prefix, String postfix, String replaceThis, String withThis) {
 	try {

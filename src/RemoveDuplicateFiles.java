@@ -1,3 +1,8 @@
+//Creation Date: 12/8/14
+//Author: Kellen Lask
+//Designed for JRE/JDK 1.8 or higher
+//File Name: RemoveDuplicateFiles.java
+//Last Edit: 07/17/2015 (MM/DD/YYYY) 17:15 (24HR)
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,10 +49,10 @@ public class RemoveDuplicateFiles {
     //JavaFX Fields
     private static Button sortFilesButton;
     private static Button batchRenameButton;
-    private static TextField fileTypes = new TextField();
-    private static Button rmvButton;
-    private static Text actiontarget;
-    private static TextField address = new TextField();
+    private static Button rmvButton;    
+    private static final TextField fileTypes = new TextField();
+    private static final TextField address = new TextField();
+    private static Text actionTarget;    
 
 //******************************************************************************
 //	Constructor
@@ -82,7 +87,11 @@ public class RemoveDuplicateFiles {
 	});
 
 	//Action Handler: remove the duplicate files in the directory.
-	rmvButton.setOnAction((ActionEvent event) -> { //Lambda expression: remove duplicate files.
+	rmvButton.setOnAction((ActionEvent event) -> {
+	    //Clear the actionTarget
+	    actionTarget.setFill(Color.BLACK);
+	    actionTarget.setText("");
+	    
 	    //Make sure we have the right path
 	    selectedDirectory = new File(address.getText());
 
@@ -96,7 +105,7 @@ public class RemoveDuplicateFiles {
 		ArrayList<File> duplicates = new ArrayList<>();
 
 		//Progress reporting values
-		actiontarget.setFill(Color.BLACK);
+		actionTarget.setFill(Color.BLACK);
 		int totalFileCount = files.size();
 		int filesProcessed = 0;
 
@@ -105,7 +114,7 @@ public class RemoveDuplicateFiles {
 		    try {
 			//Update the status
 			filesProcessed++;
-			actiontarget.setText("Processing file " + filesProcessed + " of " + totalFileCount);
+			actionTarget.setText("Processing file " + filesProcessed + " of " + totalFileCount);
 
 			//Grab the file's hash code
 			String hash = UtilFunctions.makeHash(f);
@@ -132,7 +141,7 @@ public class RemoveDuplicateFiles {
 		    try {
 			//Update the status
 			filesProcessed++;
-			actiontarget.setText("Deleting file " + filesProcessed + " of " + totalFileCount);
+			actionTarget.setText("Deleting file " + filesProcessed + " of " + totalFileCount);
 
 			//Grab the file
 			File file = itr.next();
@@ -145,11 +154,11 @@ public class RemoveDuplicateFiles {
 		    }
 		} //End while
 
-		actiontarget.setText("Deleted: " + filesProcessed);
+		actionTarget.setText("Deleted: " + filesProcessed);
 
 	    } else {
-		actiontarget.setFill(Color.FIREBRICK);
-		actiontarget.setText("Invalid directory.");
+		actionTarget.setFill(Color.FIREBRICK);
+		actionTarget.setText("Invalid directory.");
 	    }
 	});
 
@@ -190,9 +199,9 @@ public class RemoveDuplicateFiles {
 	//----------------------------------------------------------------------
 	//Setup the center GridPane
 	rmvButton = new Button("Remove Duplicates");
-	actiontarget = new Text();
+	actionTarget = new Text();
 
-	GridPane grid = GUIFactories.getCenterPane(address, rmvButton, actiontarget);
+	GridPane grid = GUIFactories.getCenterPane(address, rmvButton, actionTarget);
 	backPane.setCenter(grid);
 
 	//----------------------------------------------------------------------

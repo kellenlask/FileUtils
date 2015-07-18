@@ -1,11 +1,13 @@
-//This class's purpose is to organize the specified files in a specified directory into subdirectories by file type.
 //Creation Date: 12/8/14
 //Author: Kellen Lask
-//Designed for JRE/JDK 8 or higher
+//Designed for JRE/JDK 1.8 or higher
 //File Name: FileSort.java
-//Last Edit: 12/15/2014 (MM/DD/YYYY) 22:15 (24HR)
+//Last Edit: 07/17/2015 (MM/DD/YYYY) 17:15 (24HR)
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -20,13 +22,18 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
-//Make a main class that extends application, then instantiates the remove duplicates class with the primaryStage, then each class can simply pass the
-//stage back and forth ad infinitum
+
 /**
  *
  * @author Kellen
  */
+
+/*
+*   This is the class for the utility which takes all the files in a given 
+*   directory and sorts them into folders by filetype. The program is recursive.
+*/
 public class FileSort {
 //******************************************************************************
 //	Fields
@@ -43,10 +50,10 @@ public class FileSort {
     //JavaFX Fields
     private static Button removeDuplicatesButton;
     private static Button batchRenameButton;
-    private static TextField fileTypes = new TextField();
     private static Button sortButton;
-    private static Text actiontarget;
-    private static TextField address = new TextField();
+    private static final TextField fileTypes = new TextField();
+    private static final TextField address = new TextField();    
+    private static Text actionTarget;    
 
 //******************************************************************************
 //	Constructor
@@ -68,7 +75,6 @@ public class FileSort {
 //	Action Handlers
 //******************************************************************************
     public static void addActionHandlers(Stage primaryStage) {
-	//Action Handler: Sort Files Button Pressed.
 	removeDuplicatesButton.setOnAction((ActionEvent event) -> {
 	    new RemoveDuplicateFiles(primaryStage);
 	});
@@ -78,35 +84,78 @@ public class FileSort {
 
 	});
 
-	//Action Handler: sort the files in the directory.
-	sortButton.setOnAction((ActionEvent e) -> {
+	//Action Handler: sort the files in the given directory.
+	sortButton.setOnAction((ActionEvent event) -> {
+	    //Update the selected directory
 	    selectedDirectory = new File(address.getText());
 
-	    if (selectedDirectory != null) {
-		String[] extensions = null;
-
-		if (!fileTypes.getText().equals("")) {
-		    extensions = UtilFunctions.parseFileTypes(fileTypes.getText());
-		}
-
+	    if (selectedDirectory != null && selectedDirectory.isDirectory()) {
+		//Clear the actionTarget
+		actionTarget.setFill(Color.BLACK);
+		actionTarget.setText("");
+		
+		//Grab the entered filetypes
+		String[] extensions = UtilFunctions.parseFileTypes(fileTypes.getText());
+		
+		//Make an iterator of all the files in the directory
 		Iterator<File> fileItr = FileUtils.iterateFiles(selectedDirectory, extensions, true);
+		File organizedDir = UtilFunctions.makeDirectory(selectedDirectory, "OrganizedFiles");
+		int filesSorted = 0;
 
-		int filesSorted = UtilFunctions.sortFiles(fileItr, selectedDirectory);
+		//Sort the files
+		while (fileItr.hasNext()) {
+		    //Grab the next file from the list
+		    File f = fileItr.next();
+		    
+		    //Pull the file's extension
+		    String ext = FilenameUtils.getExtension(f.getName());
 
-		if (filesSorted == -1) {
-		    actiontarget.setFill(Color.FIREBRICK);
-		    actiontarget.setText("There was a problem, sorry.");
-		} else {
-		    actiontarget.setFill(Color.BLACK);
-		    actiontarget.setText("Sorted Files: " + filesSorted);
-		}
+		    //If the file has no extension, put it in a reasonably
+		    //  named directory
+		    if(ext.equals("")) { ext = "No Extension"; }
 
+		    //Determine the file's destination directory
+		    File dest = new File(organizedDir.getAbsolutePath() + "/" + ext);
+
+		    try {
+			//Try moving the file the normal way
+			FileUtils.moveFileToDirectory(f, dest, true);
+
+		    } catch (IOException iOException) {
+			//The target directory already has a file named f.getName()
+			String testAddress = dest.getAbsolutePath() + "/" + f.getName();
+			File test = new File(testAddress);
+
+			//Come up with a filename that is available 
+			int i = 0;
+			while(test.exists()) {
+			    i++;
+			    test = new File(testAddress + i);
+			}
+
+			try {
+			    //Move the file with its new name
+			    Files.move(f.toPath(), test.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			    
+			} catch (IOException ex) {
+			    System.out.println(ex);
+			} //End Inner Try-Catch
+		    } //End Try-Catch
+
+		    //Notify the user of our progress
+		    actionTarget.setText("Sorted Files: " + ++filesSorted);
+
+		} //End While
+
+		//Notify the user that the sorting is done.
+		actionTarget.setText("Total sorted: " + filesSorted);
+		
 	    } else {
-		actiontarget.setFill(Color.FIREBRICK);
-		actiontarget.setText("Invalid selection.");
+		//Let the user know they're a twat
+		actionTarget.setFill(Color.FIREBRICK);
+		actionTarget.setText("Invalid directory.");
 	    }
 	});
-
     } //End public static void addActionHandlers()
 
 //******************************************************************************
@@ -148,15 +197,14 @@ public class FileSort {
 	//----------------------------------------------------------------------
 	//Setup the center pane
 	sortButton = new Button("Sort Files");
-	actiontarget = new Text();
+	actionTarget = new Text();
 
-	GridPane grid = GUIFactories.getCenterPane(address, sortButton, actiontarget);
+	GridPane grid = GUIFactories.getCenterPane(address, sortButton, actionTarget);
 	backPane.setCenter(grid);
 
 	//----------------------------------------------------------------------
 	Scene scene = new Scene(backPane, WIDTH, HEIGHT);
 	return scene;
 	
-    } //End public Scene makeScene()    
-
+    } //End public Scene makeScene()
 } //End FileSort

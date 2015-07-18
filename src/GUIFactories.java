@@ -1,3 +1,8 @@
+//Creation Date: 12/8/14
+//Author: Kellen Lask
+//Designed for JRE/JDK 1.8 or higher
+//File Name: GUIFactories.java
+//Last Edit: 07/17/2015 (MM/DD/YYYY) 17:15 (24HR)
 
 import java.io.File;
 import javafx.event.ActionEvent;

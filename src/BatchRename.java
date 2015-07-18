@@ -1,10 +1,14 @@
+//Creation Date: 12/8/14
+//Author: Kellen Lask
+//Designed for JRE/JDK 1.8 or higher
+//File Name: BatchRename.java
+//Last Edit: 07/17/2015 (MM/DD/YYYY) 17:15 (24HR)
 
 import java.io.File;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -21,11 +25,17 @@ import javafx.stage.Stage;
  * @author Kellen
  */
 public class BatchRename {
-//Fields
-
+//******************************************************************************
+//	Fields
+//******************************************************************************
+    //Constants
+    private static final int WIDTH = 550;
+    private static final int HEIGHT = 350;
+    
+    //Other
     private static File selectedDirectory;
 
-//JavaFX Fields
+    //JavaFX Fields
     private static Button removeDuplicatesButton;
     private static Button sortButton;
     private static Button browseButton;
@@ -36,9 +46,10 @@ public class BatchRename {
     private static TextField postfix;
     private static TextField renameFromThis;
     private static TextField renameToThis;
-    private static ProgressIndicator pin;
 
-//Constructor
+//******************************************************************************
+//	Constructor
+//******************************************************************************
     public BatchRename(Stage primaryStage) {
 	//Setup the PrimaryStage and make it visible. 	
 	Scene scene = makeScene();
@@ -52,7 +63,9 @@ public class BatchRename {
 
     } //End public BatchRename()
 
-//Logistical Methods
+//******************************************************************************
+//	Action Handlers
+//******************************************************************************
     public static void addActionHandlers(Stage primaryStage) {
 	//Action Handler: Sort Files Button Pressed.
 	removeDuplicatesButton.setOnAction((ActionEvent event) -> {
@@ -84,11 +97,7 @@ public class BatchRename {
 		//Find all the files that match the "where" field
 		File[] files = selectedDirectory.listFiles();
 
-		pin.setProgress(-1);
-
 		int filesChanged = UtilFunctions.batchRename(files, prefix.getText(), postfix.getText(), renameFromThis.getText(), renameToThis.getText());
-
-		pin.setProgress(100);
 
 		if (filesChanged >= 0) {
 		    actiontarget.setFill(Color.BLACK);
@@ -108,6 +117,9 @@ public class BatchRename {
 
     } //End public static void addActionHandlers()
 
+//******************************************************************************
+//	GUI
+//******************************************************************************
     public static Scene makeScene() {
 	//Setup the BorderPane
 	BorderPane backPane = new BorderPane();
@@ -123,7 +135,6 @@ public class BatchRename {
 
 	mainButtons.getChildren().add(removeDuplicatesButton);
 	mainButtons.getChildren().add(sortButton);
-	mainButtons.getChildren().add(pin);
 
 	backPane.setTop(mainButtons);
 
@@ -155,7 +166,7 @@ public class BatchRename {
 	vbox.getChildren().add(afixRow);
 
 	//(2) Setup the rename row row
-	Text from = new Text("Rename: ");
+	Text from = new Text("Change: ");
 	Text to = new Text(" to ");
 
 	renameFromThis = new TextField();
@@ -200,26 +211,8 @@ public class BatchRename {
 
 	backPane.setCenter(vbox);
 
-	Scene scene = new Scene(backPane, 500, 300);
+	Scene scene = new Scene(backPane, WIDTH, HEIGHT);
 	return scene;
+	
     } //End public Scene makeScene()
-
-    public static void setProgressIndicator() {
-	pin = new ProgressIndicator(0);
-
-//		pin.progressProperty().addListener(new ChangeListener<Number>() {
-//			@Override
-//			public void changed(ObservableValue<? extends Number> ov, Number t, Number newValue) {
-//				// If progress is 100% then show Text
-//				if (newValue.doubleValue() >= 1) {
-//					// Apply CSS so you can lookup the text
-//					pin.applyCss();
-//					Text text = (Text) pin.lookup(".text.percentage");
-//					// This text replaces "Done"
-//					text.setText("");
-//				}
-//			}
-//		});
-    }
-
 }//End public class BatchRename
